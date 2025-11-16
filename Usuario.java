@@ -1,7 +1,10 @@
+
+import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class Usuario {
-    
+
     private int id;
     private String nome;
     private String email;
@@ -12,9 +15,21 @@ public class Usuario {
     private String salt;
     private String dataInscricao;
     private String uuId;
-    private String senhaConfirmada;
 
-    public Usuario(String nome, String email, String dataNasc, int cep, int genero, String senha, String salt ) throws Exception {
+    // construtor pro insert
+    public Usuario(String nome, String email, String dataNasc, int cep, int genero, String senha) throws Exception {
+        this.nome = nome;
+        this.email = email;
+        this.dataNasc = dataNasc;
+        this.cep = cep;
+        this.genero = genero;
+        this.senha = senha;
+        this.salt = "XxX";
+        this.uuId = "zZz";
+    }
+
+    // construtor pro select
+    public Usuario(int id, String nome, String email, String dataNasc, int cep, int genero, String senha, String salt, String dataInscricao, String uuId) throws Exception {
         this.nome = nome;
         this.email = email;
         this.dataNasc = dataNasc;
@@ -22,31 +37,10 @@ public class Usuario {
         this.genero = genero;
         this.senha = senha;
         this.salt = salt;
-
-        PreparedStatement stmt = DAO.createConnection().prepareStatement(
-            "INSERT INTO usuario (nome, email, data_nascimento, cep, genero, senha, salt) VALUES (?, ?, ?, ?, ?, ?, ?);"
-        );
-        stmt.setString(1, this.getNome());
-        stmt.setString(2, this.getEmail());
-        stmt.setString(3, this.getDataNasc());
-        stmt.setInt(4, this.getCep());
-        stmt.setInt(5, this.getGenero());
-        stmt.setString(6, this.getSenha());
-        stmt.setString(7, getSalt());
-        stmt.execute();
-        DAO.closeConnection();
+        this.dataInscricao = dataInscricao;
+        this.uuId = uuId;
     }
 
-    public Usuario(int id, String nome, String email, String dataNasc, int cep, int genero, String senha, String salt ) throws Exception {
-        this.nome = nome;
-        this.email = email;
-        this.dataNasc = dataNasc;
-        this.cep = cep;
-        this.genero = genero;
-        this.senha = senha;
-        this.salt = salt;
-    }
-        
     public int getId() {
         return id;
     }
@@ -111,14 +105,6 @@ public class Usuario {
         this.salt = salt;
     }
 
-    public String getSenhaConfirmada() {
-        return senhaConfirmada;
-    }
-
-    public void setSenhaConfirmada(String senhaConfirmada) {
-        this.senhaConfirmada = senhaConfirmada;
-    }
-
     public String getDataInscricao() {
         return dataInscricao;
     }
@@ -127,17 +113,26 @@ public class Usuario {
         this.dataInscricao = dataInscricao;
     }
 
+    public void setUuid(String uuId) {
+        this.uuId = uuId;
+    }
+
+    public String getUuid() {
+        return uuId;
+    }
+
     @Override
     public String toString() {
-        return "Usuario{" 
-            + "id=" + id 
-            + ", nome=" + nome 
-            + ", email=" + email 
-            + ", dataNasc=" + dataNasc 
-            + ", cep=" + cep 
-            + ", genero=" + genero 
-            + ", senha=" + senha 
-            + ", dataInscricao=" + dataInscricao + '}';
+        return "Usuario{"
+                + "id=" + id
+                + ", nome=" + nome
+                + ", email=" + email
+                + ", dataNasc=" + dataNasc
+                + ", cep=" + cep
+                + ", genero=" + genero
+                + ", senha=" + senha
+                + ", dataInscricao=" + dataInscricao
+                + "}";
     }
 
     @Override
@@ -153,5 +148,45 @@ public class Usuario {
         final Usuario other = (Usuario) object;
 
         return this.id == other.id;
+    }
+
+    public void criarUsuario() throws Exception {
+        Connection conn = DAO.createConnection();
+        PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO usuario (nome, email, data_nascimento, cep, genero, senha, salt, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?);"
+        );
+        stmt.setString(1, this.getNome());
+        stmt.setString(2, this.getEmail());
+        stmt.setString(3, this.getDataNasc());
+        stmt.setInt(4, this.getCep());
+        stmt.setInt(5, this.getGenero());
+        stmt.setString(6, this.getSenha());
+        stmt.setString(7, getSalt());
+        stmt.setString(8, this.getUuid());
+        stmt.execute();
+        DAO.closeConnection();
+    }
+
+    public static void listarUsuarios(Connection conexao) throws Exception {
+        ResultSet rs = conexao.createStatement().executeQuery(
+                "SELECT * FROM usuario;"
+        );
+        Thread.sleep(500);
+        while (rs.next()) {
+            Usuario usuario = new Usuario(
+                    rs.getInt("idusuario"),
+                    rs.getString("nome"),
+                    rs.getString("email"),
+                    rs.getString("data_nascimento"),
+                    rs.getInt("cep"),
+                    rs.getInt("genero"),
+                    rs.getString("senha"),
+                    rs.getString("salt"),
+                    rs.getString("inscrito"),
+                    rs.getString("uuid")
+            );
+            System.out.println(usuario);
+            System.out.println("===================================");
+        }
     }
 }

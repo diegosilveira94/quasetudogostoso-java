@@ -1,103 +1,174 @@
+
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Scanner;
 
 public class Conexao {
+
+    static Scanner scanner = new Scanner(System.in);
+    static Connection conexao = DAO.createConnection();
+
     public static void main(String[] args) {
-        try{
-            Connection conexao = DAO.createConnection();
-            Usuario usuario = new Usuario("Paulinho da Borracharia", "shaolinMatadorDePorco@email.com", "1994/09/05", 89210040, 1, "cascudo@123", "xXx");
-            Receita receita = new Receita("Feijoada", "Só não tem linguiça");
+        int opcao;
 
-            /* INSERT Usuário */
-            // if (isUserEmailTaken(conexao, usuario.getNome())) {
-            //     System.out.println("Error: Email '" + usuario.getEmail() + "' already exist. Skipping insert.");
-            // } else {
-            //     PreparedStatement stmt = conexao.prepareStatement(
-            //         "INSERT INTO usuario (user_name, name, password) VALUES (?, ?, ?);"
-            //     );
-            // stmt.setString(1, usuario.getUserName());
-            // stmt.setString(2, usuario.getName());
-            // stmt.setString(3, usuario.getPassword());
-            // stmt.execute();
-            // System.out.println("User inserted sucessfully.");
-            // }
+        do {
+            System.out.print("\n=== Quase Tudo Gostoso ===");
+            System.out.print("\n1 - Criar Receita");
+            System.out.print("\n2 - Criar Usuário");
+            System.out.print("\n3 - Adicionar Categoria");
+            System.out.print("\n4 - Adicionar Ingrediente");
+            System.out.print("\n5 - Listar Receitas");
+            System.out.print("\n6 - Listar Usuários");
+            System.out.print("\n7 - Listar Categorias");
+            System.out.print("\n8 - Listar Ingredientes");
+            System.out.print("\n0 - Sair");
+            System.out.print("\nEscolha uma opção: ");
+            opcao = scanner.nextInt();
+            scanner.nextLine(); // limpa buffer
 
-            /* SELECT ALL USERS */
+            switch (opcao) {
+                case 1 ->
+                    criarReceita();
+                case 2 ->
+                    criarUsuario();
+                case 3 ->
+                    criarCategoria();
+                case 4 ->
+                    criarIngrediente();
+                case 5 -> {
+                    try {
+                        Receita.listarReceitas(conexao);
+                    } catch (Exception e) {
+                        System.out.println("Erro ao listar receitas: " + e.getMessage());
+                    }
+                }
+                case 6 -> {
+                    try {
+                        Usuario.listarUsuarios(conexao);
+                    } catch (Exception e) {
+                        System.out.println("Erro ao listar receitas: " + e.getMessage());
+                    }
+                }
+                case 7 -> {
+                    try {
+                        Categoria.listarCategorias(conexao);
+                    } catch (Exception e) {
+                        System.out.println("Erro ao listar categorias: " + e.getMessage());
+                    }
+                }
+                case 8 -> {
+                    try {
+                        Ingrediente.listarIngredientes(conexao);
+                    } catch (Exception e) {
+                        System.out.println("Erro ao listar ingredientes: " + e.getMessage());
+                    }
+                }
+                case 0 ->
+                    System.out.println("Encerrando...");
+                default ->
+                    System.out.println("Opção inválida.");
+            }
+        } while (opcao != 0);
+    }
 
-            Thread.sleep(1000);
-            imprimirUsuarios(conexao);
-            imprimirReceitas(conexao);
+    public static void criarUsuario() {
+        System.out.println("Nome: ");
+        String nome = scanner.nextLine();
+        System.out.println("E-mail: ");
+        String email = scanner.nextLine();
+        System.out.println("Data de Nascimento (YYYY-MM-DD): ");
+        String dataNasc = scanner.nextLine();
+        System.out.println("CEP (Apenas números): ");
+        String cepS = scanner.nextLine();
+        int cep = Integer.parseInt(cepS); //tratamento cep int 
+        System.out.println("Gênero (M/F): ");
+        String generoS = scanner.nextLine().toUpperCase();
+        int genero = (generoS.equals("M")) ? 1 : 0;
+        boolean eqSenha = false;
+        String senha = "";
+        String senhaConfirmada = "";
+        do {
+            System.out.println("Senha: ");
+            senha = scanner.nextLine();
+            System.out.println("Confirme sua senha:");
+            senhaConfirmada = scanner.nextLine();
 
-            /* DELETE id = 2 */
-            // PreparedStatement stmt = conexao.prepareStatement(
-            //     "DELETE FROM usuario WHERE id = ?;"
-            // );
-            // stmt.setInt(1, 2);
-            // stmt.execute();
-            // imprimirUsuarios(conexao);
+            if (senha.equals(senhaConfirmada)) {
+                eqSenha = true;
+            } else {
+                System.out.println("Senhas não coincidem. Favor digitar novamente.");
+            }
+        } while (!eqSenha);
 
-            /* UPDATE id = 1 */
-            // stmt = conexao.prepareStatement(
-            //     "UPDATE usuario SET user_name = ?, name = ?, password = ? WHERE id = ?;"
-            // );
-            // stmt.setString(1, "maria.dores");
-            // stmt.setString(2, "Maria das Dores");
-            // stmt.setString(3, "123457");
-            // stmt.setInt(4, 1);
-            // stmt.execute();
-            // imprimirUsuarios(conexao);
+        try {
+            Usuario usuario = new Usuario(nome, email, dataNasc, cep, genero, senha);
+            usuario.criarUsuario();
+            System.out.println("\n");
+            System.out.println(usuario.getNome() + " - adicionado com sucesso!");
         } catch (Exception e) {
-            System.out.println("A database error occurred: " + e.getMessage());
-        }
-        
-    }
-
-    public static void imprimirReceitas(Connection conexao) throws Exception {
-        ResultSet rs = conexao.createStatement().executeQuery(
-            "SELECT * FROM receita;"
-        );
-        while(rs.next()) {
-            Receita receita2 = new Receita (
-                rs.getInt("idreceita"),
-                rs.getString("titulo"),
-                rs.getString("descricao")
-            );
-            System.out.println(receita2);
-            System.out.println("===================================");
+            System.out.println("Erro ao criar usuário: " + e.getMessage());
         }
     }
 
-    public static void imprimirUsuarios(Connection conexao) throws Exception {
-        ResultSet rs = conexao.createStatement().executeQuery(
-            "SELECT * FROM usuario;"
-        );
-        while(rs.next()){
-            Usuario usuario2 = new Usuario(
-                rs.getInt("idusuario"),
-                rs.getString("nome"),
-                rs.getString("email"),
-                rs.getString("data_nascimento"),
-                rs.getInt("cep"),
-                rs.getInt("genero"),
-                rs.getString("senha"),
-                rs.getString("salt")
-            );
-            System.out.println(usuario2);
-            System.out.println("===================================");
+    public static void criarReceita() {
+        System.out.println("Título: ");
+        String titulo = scanner.nextLine();
+        System.out.println("Descrição: ");
+        String descricao = scanner.nextLine();
+
+        Receita receita = new Receita(titulo, descricao);
+        try {
+            receita.criarReceita();
+            System.out.println("\n");
+            System.out.println("Receita criada com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro ao criar receita: " + e.getMessage());
         }
     }
-    // Validar se email já existe -> falta imprimir no main
-    public static boolean isEmailTaken(Connection conexao, String email) throws SQLException {
-        PreparedStatement checkStmt = conexao.prepareStatement(
-            "SELECT COUNT(*) FROM usuario WHERE email = ?;"
-        );
-        checkStmt.setString(1, email);
-        ResultSet rs = checkStmt.executeQuery();
-        if (rs.next()) {
-            return rs.getInt(1) > 0;
+
+    public static void criarIngrediente() {
+        System.out.println("Ingrediente: ");
+        String nome = scanner.nextLine();
+
+        Ingrediente ingrediente = new Ingrediente(nome);
+        try {
+            ingrediente.criarIngrediente();
+            System.out.println("\n");
+            System.out.println("Ingrediente inserido com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro ao criar ingrediente: " + e.getMessage());
         }
-        return false;
+    }
+
+    public static void criarCategoria() {
+        System.out.println("Categoria: ");
+        String cat = scanner.nextLine();
+
+        Categoria categoria = new Categoria(cat);
+        try {
+            categoria.criarCategoria();
+            System.out.println("\n");
+            System.out.println("Categoria inserida com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro ao criar categoria: " + e.getMessage());
+        }
     }
 }
+
+/* DELETE id = 2 */
+// PreparedStatement stmt = conexao.prepareStatement(
+//     "DELETE FROM usuario WHERE id = ?;"
+// );
+// stmt.setInt(1, 2);
+// stmt.execute();
+// imprimirUsuarios(conexao);
+
+/* UPDATE id = 1 */
+// stmt = conexao.prepareStatement(
+//     "UPDATE usuario SET user_name = ?, name = ?, password = ? WHERE id = ?;"
+// );
+// stmt.setString(1, "maria.dores");
+// stmt.setString(2, "Maria das Dores");
+// stmt.setString(3, "123457");
+// stmt.setInt(4, 1);
+// stmt.execute();
+        // imprimirUsuarios(conexao);
