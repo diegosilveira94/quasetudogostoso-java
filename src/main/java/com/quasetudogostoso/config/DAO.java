@@ -1,10 +1,12 @@
+package com.quasetudogostoso.config;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public abstract class DAO {
-    
-    private static Connection connection;
+
+    private static Connection conn;
 
     public static Connection createConnection() {
         try {
@@ -12,9 +14,9 @@ public abstract class DAO {
             final String USER = "root";
             final String PASSWORD = "";
 
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            conn = DriverManager.getConnection(URL, USER, PASSWORD);
 
-            return connection;
+            return conn;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -22,7 +24,7 @@ public abstract class DAO {
 
     public static void closeConnection() {
         try {
-            connection.close();
+            conn.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
