@@ -7,14 +7,14 @@ public class User {
     private String email;
     private String birthDate;
     private int cep;
-    private int gender;
+    private String gender;
     private String password;
     private String salt;
     private String registrationDate;
     private String uuId;
 
-    // Constructor for INSERT
-    public User(String name, String email, String birthDate, int cep, int gender, String password) {
+    // Construtor pro INSERT
+    public User(String name, String email, String birthDate, int cep, String gender, String password) {
         this.name = name;
         this.email = email;
         this.birthDate = birthDate;
@@ -25,15 +25,13 @@ public class User {
         this.uuId = "zZz";
     }
 
-    // Constructor for SELECT
-    public User(int id, String name, String email, String birthDate, int cep, int gender, String password, String salt, String registrationDate, String uuId) {
+    // Construtor pro SELECT
+    public User(int id, String name, String email, String birthDate, int cep, String gender, String registrationDate, String uuId) {
         this.name = name;
         this.email = email;
         this.birthDate = birthDate;
         this.cep = cep;
         this.gender = gender;
-        this.password = password;
-        this.salt = salt;
         this.registrationDate = registrationDate;
         this.uuId = uuId;
     }
@@ -81,11 +79,11 @@ public class User {
         this.cep = cep;
     }
 
-    public int getGender() {
+    public String getGender() {
         return gender;
     }
 
-    public void setGender(int gender) {
+    public void setGender(String gender) {
         this.gender = gender;
     }
 

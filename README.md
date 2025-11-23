@@ -4,7 +4,7 @@ API REST para plataforma de compartilhamento de receitas culinárias.
 
 ## 📋 Sobre o Projeto
 
-O **Quase Tudo Gostoso** é uma aplicação backend desenvolvida em Java que oferece uma API RESTful para gerenciamento de receitas culinárias, usuários, comentários e categorias. O sistema permite que usuários compartilhem suas receitas, avaliem receitas de outros usuários e organizem conteúdo por categorias, tipos de refeição e cozinhas regionais.
+O **Quase Tudo Gostoso** é uma aplicação backend desenvolvida em Java que oferece uma API RESTful para gerenciamento de usuários. O projeto está em desenvolvimento inicial e futuramente incluirá funcionalidades para receitas culinárias, comentários e categorias.
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -20,41 +20,32 @@ O **Quase Tudo Gostoso** é uma aplicação backend desenvolvida em Java que ofe
 ```
 quasetudogostoso/
 ├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── com/quasetudogostoso/
-│   │           ├── App.java                 # Classe principal
-│   │           ├── config/
-│   │           │   └── DAO.java             # Data Access Object
-│   │           ├── controller/
-│   │           │   └── UserController.java  # Controlador de usuários
-│   │           ├── dto/                     # Data Transfer Objects
-│   │           ├── model/
-│   │           │   └── User.java            # Modelo de usuário
-│   │           ├── repository/
-│   │           │   └── UserRepository.java  # Repositório de usuários
-│   │           └── service/
-│   │               └── UserService.java     # Serviço de usuários
-│   └── test/
+│   ├── main/java/com/quasetudogostoso/
+│   │   ├── App.java                 # Classe principal
+│   │   ├── config/
+│   │   │   └── DAO.java             # Data Access Object
+│   │   ├── controller/
+│   │   │   └── UserController.java  # Controlador REST de usuários
+│   │   ├── model/
+│   │   │   └── User.java            # Entidade de usuário
+│   │   ├── repository/
+│   │   │   └── UserRepository.java  # Camada de acesso a dados
+│   │   └── service/
+│   │       └── UserService.java     # Lógica de negócio
+│   └── test/java/                   # Testes unitários
 ├── database/
-│   └── createQTG.sql                        # Script de criação do banco
-├── pom.xml                                   # Configuração Maven
-└── README.md
+│   └── createQTG.sql                # Script de criação do banco
+├── pom.xml                           # Configuração Maven
+├── README.md                         # Documentação geral
+└── API.md                            # Documentação dos endpoints
 ```
 
-## 🗄️ Modelo de Dados
+## 🗄️ Funcionalidades Implementadas
 
-O sistema gerencia as seguintes entidades principais:
-
-- **Usuários** - Cadastro e autenticação
-- **Receitas** - Informações detalhadas de receitas
-- **Ingredientes** - Ingredientes utilizados nas receitas
-- **Categorias** - Classificação de receitas (Doces, Salgados, etc.)
-- **Comentários** - Avaliações e comentários de usuários
-- **Preparos** - Modo de preparo e tempo de preparo
-- **Utensílios** - Utensílios necessários para cada receita
-- **Cozinhas** - Tipos de cozinha (Brasileira, Italiana, etc.)
-- **Refeições** - Tipos de refeição (Café da manhã, Almoço, etc.)
+- ✅ **CRUD de Usuários** - Criação, listagem, atualização e exclusão
+- ✅ **Validação de Email** - Verifica duplicidade no cadastro
+- ✅ **Conversão de Gênero** - String ↔ Integer no banco de dados
+- 🚧 **Receitas, Ingredientes e Categorias** - Em desenvolvimento
 
 ## ⚙️ Configuração e Instalação
 
@@ -103,42 +94,35 @@ mvn exec:java -Dexec.mainClass="com.quasetudogostoso.App"
 
 O servidor será iniciado em `http://localhost:3030`
 
-## 📡 Endpoints da API
+## 📡 API
 
-### Usuários
+A documentação completa dos endpoints está disponível em **[API.md](API.md)**.
 
-#### POST /users
+### Endpoints Disponíveis
 
-Cria um novo usuário.
+| Método | Endpoint          | Descrição                |
+| ------ | ----------------- | ------------------------ |
+| POST   | `/api/users`      | Criar novo usuário       |
+| GET    | `/api/users`      | Listar todos os usuários |
+| GET    | `/api/users/{id}` | Buscar usuário por ID    |
+| PUT    | `/api/users/{id}` | Atualizar usuário        |
+| DELETE | `/api/users/{id}` | Deletar usuário          |
 
-**Exemplo de Request Body:**
+**Exemplo Rápido:**
 
-```json
-{
-  "nome": "Diego",
-  "email": "diego@gmail.com",
-  "DataNasc": "05/09/1994",
-  "cep": 89210040,
-  "genero": "M",
-  "senha": "senha123"
-}
+```bash
+# Criar usuário
+curl -X POST http://localhost:3030/api/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "João Silva",
+    "email": "joao@email.com",
+    "birthDate": "15/01/1990",
+    "cep": 12345678,
+    "gender": "Masculino",
+    "password": "senha123"
+  }'
 ```
-
-#### GET /users
-
-Lista todos os usuários.
-
-#### GET /users/{id}
-
-Obtém um usuário específico.
-
-#### PUT /users/{id}
-
-Atualiza um usuário existente.
-
-#### DELETE /users/{id}
-
-Remove um usuário.
 
 ## 🧪 Testes
 
@@ -148,16 +132,19 @@ Execute os testes unitários com:
 mvn test
 ```
 
-## 🏗️ Padrões de Arquitetura
+## 🏗️ Arquitetura
 
-O projeto segue os princípios SOLID e utiliza uma arquitetura em camadas:
+O projeto utiliza uma arquitetura em camadas seguindo princípios SOLID:
 
-- **Controller** - Recebe requisições HTTP e retorna respostas
-- **Service** - Contém a lógica de negócio
-- **Repository** - Gerencia acesso aos dados
-- **DAO** - Padrão de acesso a dados
-- **DTO** - Transferência de dados entre camadas
-- **Model** - Entidades do domínio
+```
+Controller → Service → Repository → DAO → Database
+```
+
+- **Controller** - Gerencia requisições HTTP e respostas
+- **Service** - Implementa regras de negócio e validações
+- **Repository** - Acessa e manipula dados no banco
+- **DAO** - Gerencia conexão com o banco de dados
+- **Model** - Define as entidades do domínio
 
 ## 📚 Referências
 

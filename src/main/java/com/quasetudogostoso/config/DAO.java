@@ -10,6 +10,9 @@ public abstract class DAO {
 
     public static Connection createConnection() {
         try {
+            // Explicitly load the MySQL JDBC driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
             final String URL = "jdbc:mysql://localhost:3306/quasetudogostoso";
             final String USER = "root";
             final String PASSWORD = "";
@@ -19,6 +22,8 @@ public abstract class DAO {
             return conn;
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("MySQL JDBC Driver not found", e);
         }
     }
 

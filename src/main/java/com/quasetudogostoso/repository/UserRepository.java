@@ -10,32 +10,52 @@ import java.util.List;
 import com.quasetudogostoso.config.DAO;
 import com.quasetudogostoso.model.User;
 
+/**
+ * Repositório responsável pelas operações de persistência de usuários.
+ * Implementa o padrão DAO (Data Access Object) para acesso ao banco de dados.
+ */
 public class UserRepository extends DAO {
 
-    public void registerUser(User user) {
+    /**
+     * Insere um novo usuário no banco de dados.
+     *
+     * @param user O usuário a ser inserido
+     * @throws RuntimeException se ocorrer erro na inserção
+     */
+    public void insert(User user) {
         try {
             final Connection conn = DAO.createConnection();
 
             PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO usuario (nome, email, data_nascimento, cep, genero, senha) VALUES (?, ?, ?, ?, ?, ?);"
+                    "INSERT INTO usuario (nome, email, data_nascimento, cep, genero, senha, salt) VALUES (?, ?, ?, ?, ?, ?, ?);"
             );
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getEmail());
             stmt.setString(3, user.getBirthDate());
             stmt.setInt(4, user.getCep());
-            stmt.setInt(5, user.getGender());
+            int genderInt = convertGender(user.getGender());
+            stmt.setInt(5, genderInt); // Converte gênero de String para int
             stmt.setString(6, user.getPassword());
+            stmt.setString(7, user.getSalt());
             stmt.executeUpdate();
 
             System.out.println("Usuário registrado com sucesso!");
 
             closeConnection();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao inserir o usuário no banco de dados", e);
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao inserir o usuário no banco de dados: " + e.getMessage(), e);
         }
     }
 
-    public List<User> getAllUsers() {
+    /**
+     * Retorna todos os usuários cadastrados no banco de dados.
+     *
+     * @return Lista de todos os usuários
+     * @throws RuntimeException se ocorrer erro na consulta
+     */
+    public List<User> selectAll() {
         List<User> users = new ArrayList<>();
         try {
             final Connection conn = DAO.createConnection();
@@ -50,9 +70,7 @@ public class UserRepository extends DAO {
                 user.setEmail(rs.getString("email"));
                 user.setBirthDate(rs.getString("data_nascimento"));
                 user.setCep(rs.getInt("cep"));
-                user.setGender(rs.getInt("genero"));
-                user.setPassword(rs.getString("senha"));
-                user.setSalt(rs.getString("salt"));
+                user.setGender(convertGender(rs.getInt("genero"))); // Converte gênero de int para String
                 user.setRegistrationDate(rs.getString("inscrito"));
                 user.setUuId(rs.getString("uuid"));
                 users.add(user);
@@ -63,22 +81,29 @@ public class UserRepository extends DAO {
             return users;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao consultar usuários no banco de dados", e);
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao consultar os usuários no banco de dados: " + e.getMessage(), e);
         }
     }
 
-    public User getUser(int id, String email) {
-        // GET USER BY ID OR EMAIL
+    /**
+     * Busca um usuário específico pelo ID.
+     *
+     * @param id O ID do usuário
+     * @return O usuário encontrado ou um objeto vazio
+     * @throws RuntimeException se ocorrer erro na consulta
+     */
+    public User select(int id) {
         User user = new User();
 
         try {
             final Connection conn = DAO.createConnection();
 
             PreparedStatement stmt = conn.prepareStatement(
-                    "SELECT * FROM usuario WHERE idusuario = ? OR email = ?;"
+                    "SELECT * FROM usuario WHERE idusuario = ?;"
             );
             stmt.setInt(1, id);
-            stmt.setString(2, email);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -87,9 +112,7 @@ public class UserRepository extends DAO {
                 user.setEmail(rs.getString("email"));
                 user.setBirthDate(rs.getString("data_nascimento"));
                 user.setCep(rs.getInt("cep"));
-                user.setGender(rs.getInt("genero"));
-                user.setPassword(rs.getString("senha"));
-                user.setSalt(rs.getString("salt"));
+                user.setGender(convertGender(rs.getInt("genero"))); // Converte gênero de int para String
                 user.setRegistrationDate(rs.getString("inscrito"));
                 user.setUuId(rs.getString("uuid"));
             }
@@ -98,15 +121,23 @@ public class UserRepository extends DAO {
 
             return user;
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao consultar usuário no banco de dados", e);
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao consultar o usuário no banco de dados: " + e.getMessage(), e);
         }
     }
 
-    public void updateUser(User user) {
+    /**
+     * Atualiza os dados de um usuário no banco de dados.
+     *
+     * @param user O usuário com os dados atualizados
+     * @throws RuntimeException se ocorrer erro na atualização
+     */
+    public void update(User user) {
         try {
             final Connection conn = DAO.createConnection();
             PreparedStatement stmt = conn.prepareStatement(
-                    "UPDATE usuario SET nome = ? SET email = ? SET data_nascimento = ? WHERE id = ?;"
+                    "UPDATE usuario SET nome = ?, email = ?, data_nascimento = ? WHERE idusuario = ?;"
             );
             stmt.setString(1, user.getName());
             stmt.setString(2, user.getEmail());
@@ -114,30 +145,46 @@ public class UserRepository extends DAO {
             stmt.setInt(4, user.getId());
             stmt.executeUpdate();
             System.out.println("Usuário atualizado com sucesso!");
+            closeConnection();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao atualizar usuário no banco de dados", e);
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao atualizar o usuário no banco de dados: " + e.getMessage(), e);
         }
-
-        closeConnection();
     }
 
-    public void deleteUser(User user) {
+    /**
+     * Remove um usuário do banco de dados.
+     *
+     * @param id O ID do usuário a ser removido
+     * @throws RuntimeException se ocorrer erro na remoção
+     */
+    public void delete(int id) {
         try {
             final Connection conn = DAO.createConnection();
 
             PreparedStatement stmt = conn.prepareStatement(
-                    "DELETE FROM usuario WHERE id = ?;"
+                    "DELETE FROM usuario WHERE idusuario = ?;"
             );
-            stmt.setInt(1, user.getId());
+            stmt.setInt(1, id);
             stmt.executeUpdate();
             System.out.println("Usuário deletado com sucesso!");
+            closeConnection();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao deletar usuário no banco de dados", e);
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao deletar o usuário no banco de dados: " + e.getMessage(), e);
         }
-
-        closeConnection();
     }
 
+    /**
+     * Verifica se um email já está registrado no banco de dados. Utilizado para
+     * evitar registros duplicados.
+     *
+     * @param email O email a ser verificado
+     * @return true se o email já existe, false caso contrário
+     * @throws RuntimeException se ocorrer erro na verificação
+     */
     public boolean existsByEmail(String email) {
         boolean emailExists = false;
         try {
@@ -148,7 +195,7 @@ public class UserRepository extends DAO {
             );
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
-            if (rs != null) {
+            if (rs != null && rs.next()) {
                 emailExists = true;
             }
 
@@ -157,7 +204,53 @@ public class UserRepository extends DAO {
             return emailExists;
 
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao verificar email no banco de dados", e);
+            System.err.println("Message: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Erro ao verificar email no banco de dados: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Converte o gênero do usuário de inteiro para string. Utiliza sobrecarga
+     * de método (overloading).
+     *
+     * @param genderInt O gênero em formato inteiro (1=Masculino, 2=Feminino,
+     * 3=Outro)
+     * @return O gênero em formato string
+     */
+    public String convertGender(int genderInt) {
+        String genderStr;
+        switch (genderInt) {
+            case 1 ->
+                genderStr = "Masculino";
+            case 2 ->
+                genderStr = "Feminino";
+            default ->
+                genderStr = "Outro";
+        }
+
+        return genderStr;
+    }
+
+    /**
+     * Converte o gênero do usuário de string para inteiro. Utiliza sobrecarga
+     * de método (overloading).
+     *
+     * @param genderStr O gênero em formato string ("Masculino", "Feminino" ou
+     * "Outro")
+     * @return O gênero em formato inteiro (1=Masculino, 2=Feminino, 3=Outro)
+     */
+    public int convertGender(String genderStr) {
+        int genderInt;
+        switch (genderStr) {
+            case "Masculino" ->
+                genderInt = 1;
+            case "Feminino" ->
+                genderInt = 2;
+            default ->
+                genderInt = 3;
+        }
+
+        return genderInt;
     }
 }
