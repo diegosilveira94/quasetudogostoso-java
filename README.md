@@ -171,7 +171,3 @@ Contribuições são bem-vindas! Sinta-se à vontade para abrir issues ou pull r
 ## 📄 Licença
 
 Este projeto está sob a licença MIT.
-
-## 👨‍💻 Autor
-
-Diego Silveira - [@diegosilveira94](https://github.com/diegosilveira94)
