@@ -1,37 +1,44 @@
-# Documentação da API - Quase Tudo Gostoso
+# 📚 Documentação da API - Quase Tudo Gostoso
 
-## Base URL
-
-```
-http://localhost:3030
-```
-
-## Autenticação
-
-Atualmente a API não requer autenticação. Funcionalidade em desenvolvimento.
+**Base URL:** `http://localhost:3030`  
+**Autenticação:** Em desenvolvimento
 
 ---
 
-## Endpoints de Usuários
+## 📑 Índice
 
-### 1. Criar Usuário
+- [Usuários](#-usuários)
+- [Receitas](#-receitas)
+- [Categorias](#-categorias)
+- [Ingredientes](#-ingredientes)
+- [Ingredientes da Receita](#-ingredientes-da-receita)
+- [Códigos HTTP](#-códigos-de-status-http)
+- [Regras Gerais](#-regras-gerais)
 
-Cria um novo usuário no sistema.
+---
 
-**Endpoint:** `POST /api/users`
+## 👤 Usuários
 
-**Headers:**
+### 📋 Resumo dos Endpoints
 
-```
-Content-Type: application/json
-```
+| Método | Endpoint          | Descrição         |
+| ------ | ----------------- | ----------------- |
+| POST   | `/api/users`      | Criar usuário     |
+| GET    | `/api/users`      | Listar todos      |
+| GET    | `/api/users/{id}` | Buscar por ID     |
+| PUT    | `/api/users/{id}` | Atualizar usuário |
+| DELETE | `/api/users/{id}` | Deletar usuário   |
+
+### 1️⃣ Criar Usuário
+
+**`POST /api/users`**
 
 **Request Body:**
 
 ```json
 {
   "name": "João Silva",
-  "email": "joao.silva@email.com",
+  "email": "joao@email.com",
   "birthDate": "15/01/1990",
   "cep": 12345678,
   "gender": "Masculino",
@@ -39,35 +46,29 @@ Content-Type: application/json
 }
 ```
 
-**Campos:**
+| Campo     | Tipo   | Obrigatório | Validação                        |
+| --------- | ------ | ----------- | -------------------------------- |
+| name      | string | ✅          | Nome completo                    |
+| email     | string | ✅          | Email único, deve conter "@"     |
+| birthDate | string | ❌          | Formato DD/MM/YYYY               |
+| cep       | number | ❌          | Apenas números                   |
+| gender    | string | ❌          | "Masculino", "Feminino", "Outro" |
+| password  | string | ✅          | Senha do usuário                 |
 
-| Campo     | Tipo   | Obrigatório | Descrição                                    |
-| --------- | ------ | ----------- | -------------------------------------------- |
-| name      | string | Sim         | Nome completo do usuário                     |
-| email     | string | Sim         | Email único (validado para duplicidade)      |
-| birthDate | string | Não         | Data de nascimento (formato: **DD/MM/YYYY**) |
-| cep       | number | Não         | CEP do usuário                               |
-| gender    | string | Não         | "Masculino", "Feminino" ou "Outro"           |
-| password  | string | Sim         | Senha do usuário                             |
-
-**Response (200 OK):**
+**Response 200:**
 
 ```json
 {
-  "id": 0,
+  "id": 1,
   "name": "João Silva",
-  "email": "joao.silva@email.com",
+  "email": "joao@email.com",
   "birthDate": "1990-01-15",
-  "cep": 12345678,
   "gender": "Masculino",
-  "password": "senha123",
-  "salt": "XxX",
-  "registrationDate": null,
-  "uuId": "zZz"
+  "registrationDate": "2025-11-24 10:30:00"
 }
 ```
 
-**Response (400 Bad Request):**
+**Response 400:**
 
 ```json
 {
@@ -75,96 +76,40 @@ Content-Type: application/json
 }
 ```
 
-**Exemplo cURL:**
+### 2️⃣ Listar Usuários
 
-```bash
-curl -X POST http://localhost:3030/api/users \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "João Silva",
-    "email": "joao.silva@email.com",
-    "birthDate": "15/01/1990",
-    "cep": 12345678,
-    "gender": "Masculino",
-    "password": "senha123"
-  }'
-```
+**`GET /api/users`**
 
----
-
-### 2. Listar Todos os Usuários
-
-Retorna a lista completa de usuários cadastrados.
-
-**Endpoint:** `GET /api/users`
-
-**Response (200 OK):**
+**Response 200:**
 
 ```json
 [
   {
     "id": 1,
     "name": "João Silva",
-    "email": "joao.silva@email.com",
+    "email": "joao@email.com",
     "birthDate": "1990-01-15",
-    "cep": 12345678,
-    "gender": "Masculino",
-    "registrationDate": "2025-11-22 10:30:00",
-    "uuId": "abc123-def456"
-  },
-  {
-    "id": 2,
-    "name": "Maria Santos",
-    "email": "maria.santos@email.com",
-    "birthDate": "1995-06-20",
-    "cep": 87654321,
-    "gender": "Feminino",
-    "registrationDate": "2025-11-22 11:15:00",
-    "uuId": "xyz789-uvw321"
+    "gender": "Masculino"
   }
 ]
 ```
 
-**Observação:** O campo `password` não é retornado por segurança.
+### 3️⃣ Buscar Usuário por ID
 
-**Exemplo cURL:**
+**`GET /api/users/{id}`**
 
-```bash
-curl -X GET http://localhost:3030/api/users
-```
-
----
-
-### 3. Buscar Usuário por ID
-
-Retorna os dados de um usuário específico.
-
-**Endpoint:** `GET /api/users/{id}`
-
-**Parâmetros de URL:**
-
-| Parâmetro | Tipo    | Descrição     |
-| --------- | ------- | ------------- |
-| id        | integer | ID do usuário |
-
-**Exemplo:** `GET /api/users/1`
-
-**Response (200 OK):**
+**Response 200:**
 
 ```json
 {
   "id": 1,
   "name": "João Silva",
-  "email": "joao.silva@email.com",
-  "birthDate": "1990-01-15",
-  "cep": 12345678,
-  "gender": "Masculino",
-  "registrationDate": "2025-11-22 10:30:00",
-  "uuId": "abc123-def456"
+  "email": "joao@email.com",
+  "birthDate": "1990-01-15"
 }
 ```
 
-**Response (404 Not Found):**
+**Response 404:**
 
 ```json
 {
@@ -172,31 +117,9 @@ Retorna os dados de um usuário específico.
 }
 ```
 
-**Exemplo cURL:**
+### 4️⃣ Atualizar Usuário
 
-```bash
-curl -X GET http://localhost:3030/api/users/1
-```
-
----
-
-### 4. Atualizar Usuário
-
-Atualiza os dados de um usuário existente.
-
-**Endpoint:** `PUT /api/users/{id}`
-
-**Parâmetros de URL:**
-
-| Parâmetro | Tipo    | Descrição     |
-| --------- | ------- | ------------- |
-| id        | integer | ID do usuário |
-
-**Headers:**
-
-```
-Content-Type: application/json
-```
+**`PUT /api/users/{id}`**
 
 **Request Body:**
 
@@ -208,17 +131,9 @@ Content-Type: application/json
 }
 ```
 
-**Campos Atualizáveis:**
+⚠️ Apenas `name`, `email` e `birthDate` podem ser atualizados.
 
-| Campo     | Tipo   | Descrição                                         |
-| --------- | ------ | ------------------------------------------------- |
-| name      | string | Novo nome do usuário                              |
-| email     | string | Novo email                                        |
-| birthDate | string | Nova data de nascimento (formato: **DD/MM/YYYY**) |
-
-⚠️ **Importante:** Apenas os campos `name`, `email` e `birthDate` podem ser atualizados. Outros campos enviados no body serão ignorados.
-
-**Response (200 OK):**
+**Response 200:**
 
 ```json
 {
@@ -226,41 +141,11 @@ Content-Type: application/json
 }
 ```
 
-**Response (400 Bad Request):**
+### 5️⃣ Deletar Usuário
 
-```json
-{
-  "error": "Erro ao atualizar usuário"
-}
-```
+**`DELETE /api/users/{id}`**
 
-**Exemplo cURL:**
-
-```bash
-curl -X PUT http://localhost:3030/api/users/1 \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "João Silva Atualizado",
-    "email": "joao.novo@email.com",
-    "birthDate": "15/01/1990"
-  }'
-```
-
----
-
-### 5. Deletar Usuário
-
-Remove um usuário do sistema.
-
-**Endpoint:** `DELETE /api/users/{id}`
-
-**Parâmetros de URL:**
-
-| Parâmetro | Tipo    | Descrição     |
-| --------- | ------- | ------------- |
-| id        | integer | ID do usuário |
-
-**Response (200 OK):**
+**Response 200:**
 
 ```json
 {
@@ -268,119 +153,758 @@ Remove um usuário do sistema.
 }
 ```
 
-**Response (400 Bad Request):**
+---
+
+## 🍲 Receitas
+
+### 📋 Resumo dos Endpoints
+
+| Método | Endpoint            | Descrição         |
+| ------ | ------------------- | ----------------- |
+| POST   | `/api/recipes`      | Criar receita     |
+| GET    | `/api/recipes`      | Listar todas      |
+| GET    | `/api/recipes/{id}` | Buscar por ID     |
+| PUT    | `/api/recipes/{id}` | Atualizar receita |
+| DELETE | `/api/recipes/{id}` | Deletar receita   |
+
+### 1️⃣ Criar Receita
+
+**`POST /api/recipes`**
+
+**Request Body:**
 
 ```json
 {
-  "error": "Erro ao deletar usuário"
+  "title": "Bolo de Chocolate",
+  "description": "Delicioso bolo caseiro",
+  "imageURL": "https://exemplo.com/bolo.jpg",
+  "author": {
+    "id": 1
+  },
+  "idPreparation": 1,
+  "idDifficulty": 1,
+  "idCost": 1
 }
 ```
 
-**Exemplo cURL:**
+| Campo         | Tipo   | Obrigatório | Validação                  |
+| ------------- | ------ | ----------- | -------------------------- |
+| title         | string | ✅          | 3-100 caracteres           |
+| description   | string | ❌          | Descrição da receita       |
+| imageURL      | string | ❌          | URL da imagem              |
+| author        | object | ✅          | Objeto com ID do usuário   |
+| idPreparation | number | ❌          | ID do tempo de preparo     |
+| idDifficulty  | number | ❌          | ID do nível de dificuldade |
+| idCost        | number | ❌          | ID do custo                |
 
-```bash
-curl -X DELETE http://localhost:3030/api/users/1
+**Response 200:**
+
+```json
+{
+  "status": "Receita criada com sucesso!"
+}
+```
+
+### 2️⃣ Listar Receitas
+
+**`GET /api/recipes`**
+
+Retorna todas as receitas com informações do autor.
+
+**Response 200:**
+
+```json
+[
+  {
+    "id": 1,
+    "title": "Bolo de Chocolate",
+    "description": "Delicioso bolo caseiro",
+    "author": {
+      "id": 1,
+      "name": "João Silva"
+    }
+  }
+]
+```
+
+### 3️⃣ Listar Receitas por Autor
+
+**`GET /api/recipes?author={userId}`**
+
+Retorna receitas de um autor específico.
+
+### 4️⃣ Buscar Receita por ID
+
+**`GET /api/recipes/{id}`**
+
+**Response 200:**
+
+```json
+{
+  "id": 1,
+  "title": "Bolo de Chocolate",
+  "description": "Delicioso bolo caseiro",
+  "author": {
+    "id": 1,
+    "name": "João Silva"
+  }
+}
+```
+
+**Response 404:**
+
+```json
+{
+  "error": "Receita não encontrada"
+}
+```
+
+### 5️⃣ Atualizar Receita
+
+**`PUT /api/recipes/{id}`**
+
+**Request Body:**
+
+```json
+{
+  "title": "Bolo de Chocolate Premium",
+  "description": "Nova descrição",
+  "imageURL": "nova-url.jpg",
+  "idPreparation": 2,
+  "idDifficulty": 2,
+  "idCost": 2
+}
+```
+
+**Response 200:**
+
+```json
+{
+  "status": "Receita atualizada!"
+}
+```
+
+### 6️⃣ Deletar Receita
+
+**`DELETE /api/recipes/{id}`**
+
+**Response 200:**
+
+```json
+{
+  "status": "Receita deletada!"
+}
 ```
 
 ---
 
-## Códigos de Status HTTP
+## 📂 Categorias
 
-| Código | Status      | Descrição                                      |
-| ------ | ----------- | ---------------------------------------------- |
-| 200    | OK          | Requisição executada com sucesso               |
-| 400    | Bad Request | Dados inválidos, email duplicado ou erro geral |
-| 404    | Not Found   | Recurso não encontrado                         |
+### 📋 Resumo dos Endpoints
+
+| Método | Endpoint                          | Descrição           |
+| ------ | --------------------------------- | ------------------- |
+| POST   | `/api/categories`                 | Criar categoria     |
+| GET    | `/api/categories`                 | Listar todas        |
+| GET    | `/api/categories/active`          | Listar ativas       |
+| GET    | `/api/categories/{id}`            | Buscar por ID       |
+| PUT    | `/api/categories/{id}`            | Atualizar categoria |
+| DELETE | `/api/categories/{id}`            | Deletar categoria   |
+| GET    | `/api/categories/{id}/activate`   | Ativar categoria    |
+| GET    | `/api/categories/{id}/deactivate` | Desativar categoria |
+
+### 1️⃣ Criar Categoria
+
+**`POST /api/categories`**
+
+**Request Body:**
+
+```json
+{
+  "category": "Doces",
+  "active": true
+}
+```
+
+| Campo    | Tipo    | Obrigatório | Validação       |
+| -------- | ------- | ----------- | --------------- |
+| category | string  | ✅          | 3-80 caracteres |
+| active   | boolean | ❌          | true/false      |
+
+**Validações:**
+
+- Nome único (não duplicado)
+- 3-80 caracteres obrigatórios
+
+**Response 200:**
+
+```json
+{
+  "status": "Categoria criada!"
+}
+```
+
+**Response 400:**
+
+```json
+{
+  "error": "Categoria já existe"
+}
+```
+
+### 2️⃣ Listar Categorias
+
+**`GET /api/categories`**
+
+Retorna todas as categorias (ativas e inativas).
+
+**Response 200:**
+
+```json
+[
+  {
+    "id": 1,
+    "category": "Doces",
+    "active": true
+  },
+  {
+    "id": 2,
+    "category": "Salgados",
+    "active": false
+  }
+]
+```
+
+### 3️⃣ Listar Categorias Ativas
+
+**`GET /api/categories/active`**
+
+Retorna apenas categorias ativas.
+
+**Response 200:**
+
+```json
+[
+  {
+    "id": 1,
+    "category": "Doces",
+    "active": true
+  }
+]
+```
+
+### 4️⃣ Buscar Categoria por ID
+
+**`GET /api/categories/{id}`**
+
+**Response 200:**
+
+```json
+{
+  "id": 1,
+  "category": "Doces",
+  "active": true
+}
+```
+
+**Response 404:**
+
+```json
+{
+  "error": "Categoria não encontrada"
+}
+```
+
+### 5️⃣ Atualizar Categoria
+
+**`PUT /api/categories/{id}`**
+
+**Request Body:**
+
+```json
+{
+  "category": "Sobremesas",
+  "active": true
+}
+```
+
+**Response 200:**
+
+```json
+{
+  "status": "Categoria atualizada!"
+}
+```
+
+### 6️⃣ Deletar Categoria
+
+**`DELETE /api/categories/{id}`**
+
+**Response 200:**
+
+```json
+{
+  "status": "Categoria deletada!"
+}
+```
+
+### 7️⃣ Ativar Categoria
+
+**`GET /api/categories/{id}/activate`**
+
+Define `active = true`.
+
+**Response 200:**
+
+```json
+{
+  "status": "Categoria ativada!"
+}
+```
+
+### 8️⃣ Desativar Categoria
+
+**`GET /api/categories/{id}/deactivate`**
+
+Define `active = false`.
+
+**Response 200:**
+
+```json
+{
+  "status": "Categoria desativada!"
+}
+```
 
 ---
 
-## Regras de Negócio
+## 🥕 Ingredientes
 
-### Validação de Email
+### 📋 Resumo dos Endpoints
 
-- Emails devem ser únicos no sistema
-- Ao tentar cadastrar um email já existente, retorna erro 400
+| Método | Endpoint                      | Descrição             |
+| ------ | ----------------------------- | --------------------- |
+| POST   | `/api/ingredients`            | Criar ingrediente     |
+| GET    | `/api/ingredients`            | Listar todos          |
+| GET    | `/api/ingredients?search={q}` | Buscar por nome       |
+| GET    | `/api/ingredients/{id}`       | Buscar por ID         |
+| PUT    | `/api/ingredients/{id}`       | Atualizar ingrediente |
+| DELETE | `/api/ingredients/{id}`       | Deletar ingrediente   |
 
-### Campo Gender (Gênero)
+### 1️⃣ Criar Ingrediente
 
-O campo `gender` aceita valores em string e é convertido para inteiro no banco:
+**`POST /api/ingredients`**
 
-| Valor Enviado | Valor no Banco | Descrição |
-| ------------- | -------------- | --------- |
-| "Masculino"   | 1              | Masculino |
-| "Feminino"    | 2              | Feminino  |
-| "Outro"       | 3              | Outro     |
+**Request Body:**
 
-### Atualização Parcial de Usuário
+```json
+{
+  "ingredient": "Farinha de trigo"
+}
+```
 
-- Apenas 3 campos podem ser atualizados: `name`, `email`, `birthDate`
-- Campos como `password`, `cep`, `gender` não podem ser alterados via PUT
-- Para alterar esses campos, será necessário implementar endpoints específicos
+| Campo      | Tipo   | Obrigatório | Validação       |
+| ---------- | ------ | ----------- | --------------- |
+| ingredient | string | ✅          | 2-90 caracteres |
+
+**Validações:**
+
+- Nome único (não duplicado)
+- 2-90 caracteres obrigatórios
+
+**Response 200:**
+
+```json
+{
+  "status": "Ingrediente criado!"
+}
+```
+
+**Response 400:**
+
+```json
+{
+  "error": "Ingrediente já existe"
+}
+```
+
+### 2️⃣ Listar Ingredientes
+
+**`GET /api/ingredients`**
+
+Retorna todos os ingredientes cadastrados.
+
+**Response 200:**
+
+```json
+[
+  {
+    "id": 1,
+    "ingredient": "Farinha de trigo"
+  },
+  {
+    "id": 2,
+    "ingredient": "Açúcar"
+  }
+]
+```
+
+### 3️⃣ Buscar por Nome
+
+**`GET /api/ingredients?search={termo}`**
+
+Busca ingredientes que contenham o termo (LIKE %termo%).
+
+**Exemplo:** `/api/ingredients?search=fari`
+
+**Response 200:**
+
+```json
+[
+  {
+    "id": 1,
+    "ingredient": "Farinha de trigo"
+  },
+  {
+    "id": 5,
+    "ingredient": "Farinha de milho"
+  }
+]
+```
+
+### 4️⃣ Buscar Ingrediente por ID
+
+**`GET /api/ingredients/{id}`**
+
+**Response 200:**
+
+```json
+{
+  "id": 1,
+  "ingredient": "Farinha de trigo"
+}
+```
+
+**Response 404:**
+
+```json
+{
+  "error": "Ingrediente não encontrado"
+}
+```
+
+### 5️⃣ Atualizar Ingrediente
+
+**`PUT /api/ingredients/{id}`**
+
+**Request Body:**
+
+```json
+{
+  "ingredient": "Farinha de trigo integral"
+}
+```
+
+**Response 200:**
+
+```json
+{
+  "status": "Ingrediente atualizado!"
+}
+```
+
+### 6️⃣ Deletar Ingrediente
+
+**`DELETE /api/ingredients/{id}`**
+
+**Response 200:**
+
+```json
+{
+  "status": "Ingrediente deletado!"
+}
+```
 
 ---
 
-## Exemplos de Uso Completo
+## 🥘 Ingredientes da Receita
 
-### Fluxo Típico
+**Base:** `/api/recipes/{recipeId}/ingredients`
+
+### 📋 Resumo dos Endpoints
+
+| Método | Endpoint                                             | Descrição             |
+| ------ | ---------------------------------------------------- | --------------------- |
+| POST   | `/api/recipes/{recipeId}/ingredients`                | Adicionar ingrediente |
+| GET    | `/api/recipes/{recipeId}/ingredients`                | Listar ingredientes   |
+| PUT    | `/api/recipes/{recipeId}/ingredients/{ingredientId}` | Atualizar quantidade  |
+| DELETE | `/api/recipes/{recipeId}/ingredients/{ingredientId}` | Remover ingrediente   |
+| DELETE | `/api/recipes/{recipeId}/ingredients`                | Remover todos         |
+
+### 1️⃣ Adicionar Ingrediente à Receita
+
+**`POST /api/recipes/{recipeId}/ingredients`**
+
+**Request Body:**
+
+```json
+{
+  "ingredient": {
+    "id": 5
+  },
+  "quantity": 2.5,
+  "idMeasurement": 1
+}
+```
+
+| Campo         | Tipo   | Obrigatório | Validação                    |
+| ------------- | ------ | ----------- | ---------------------------- |
+| ingredient    | object | ✅          | Objeto com ID do ingrediente |
+| quantity      | number | ✅          | Maior que zero               |
+| idMeasurement | number | ✅          | ID da unidade de medida      |
+
+**Validações:**
+
+- Receita e ingrediente devem existir
+- Quantidade > 0
+- Ingrediente não pode estar duplicado na receita
+
+**Response 200:**
+
+```json
+{
+  "status": "Ingrediente adicionado à receita!"
+}
+```
+
+**Response 400:**
+
+```json
+{
+  "error": "Ingrediente já existe nesta receita"
+}
+```
+
+### 2️⃣ Listar Ingredientes da Receita
+
+**`GET /api/recipes/{recipeId}/ingredients`**
+
+Retorna todos os ingredientes da receita com quantidades.
+
+**Response 200:**
+
+```json
+[
+  {
+    "ingredient": {
+      "id": 1,
+      "ingredient": "Farinha de trigo"
+    },
+    "quantity": 2.5,
+    "idMeasurement": 1
+  },
+  {
+    "ingredient": {
+      "id": 3,
+      "ingredient": "Açúcar"
+    },
+    "quantity": 1.0,
+    "idMeasurement": 1
+  }
+]
+```
+
+### 3️⃣ Atualizar Quantidade
+
+**`PUT /api/recipes/{recipeId}/ingredients/{ingredientId}`**
+
+**Request Body:**
+
+```json
+{
+  "quantity": 3.0,
+  "idMeasurement": 2
+}
+```
+
+**Response 200:**
+
+```json
+{
+  "status": "Ingrediente atualizado!"
+}
+```
+
+### 4️⃣ Remover Ingrediente
+
+**`DELETE /api/recipes/{recipeId}/ingredients/{ingredientId}`**
+
+Remove um ingrediente específico da receita.
+
+**Response 200:**
+
+```json
+{
+  "status": "Ingrediente removido!"
+}
+```
+
+### 5️⃣ Remover Todos os Ingredientes
+
+**`DELETE /api/recipes/{recipeId}/ingredients`**
+
+Remove todos os ingredientes da receita.
+
+**Response 200:**
+
+```json
+{
+  "status": "Todos os ingredientes removidos!"
+}
+```
+
+---
+
+## 📊 Códigos de Status HTTP
+
+| Código | Significado            | Quando Ocorre                               |
+| ------ | ---------------------- | ------------------------------------------- |
+| 200    | ✅ Sucesso             | Operação realizada com sucesso              |
+| 400    | ⚠️ Requisição Inválida | Dados inválidos, duplicados ou faltantes    |
+| 404    | ❌ Não Encontrado      | Recurso (usuário, receita, etc.) não existe |
+
+---
+
+## 📐 Regras Gerais
+
+### Formato de Datas
+
+- **Entrada:** `DD/MM/YYYY` (formato brasileiro)
+- **Saída:** `YYYY-MM-DD` (formato MySQL)
+- Exemplo: `15/01/1990` → `1990-01-15`
+
+### Campo Gender
+
+Conversão string → integer no banco:
+
+| Valor Enviado | Valor no Banco |
+| ------------- | -------------- |
+| "Masculino"   | 1              |
+| "Feminino"    | 2              |
+| "Outro"       | 3              |
+
+### Validações Comuns
+
+- **Email único:** Não permite duplicatas
+- **Nomes únicos:** Categorias e ingredientes não podem duplicar
+- **Autor obrigatório:** Receitas devem ter um autor válido
+- **Quantidade > 0:** Ingredientes da receita devem ter quantidade positiva
+
+### Configuração
+
+- **Porta:** `3030` (configurável em `App.java`)
+- **Banco:** MySQL configurado em `DAO.java`
+- **Headers:** `Content-Type: application/json` em todas as requisições POST/PUT
+
+---
+
+## 🚀 Exemplos de Uso
+
+### Fluxo Completo: Criar Receita com Ingredientes
 
 ```bash
-# 1. Criar um usuário
+# 1. Criar usuário (autor)
 curl -X POST http://localhost:3030/api/users \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Ana Costa",
+    "name": "Ana Silva",
     "email": "ana@email.com",
-    "birthDate": "10/03/1992",
-    "cep": 11223344,
-    "gender": "Feminino",
-    "password": "senha456"
+    "password": "senha123"
   }'
 
-# 2. Listar todos os usuários
-curl -X GET http://localhost:3030/api/users
-
-# 3. Buscar o usuário criado (assumindo ID = 5)
-curl -X GET http://localhost:3030/api/users/5
-
-# 4. Atualizar o nome do usuário
-curl -X PUT http://localhost:3030/api/users/5 \
+# 2. Criar categoria
+curl -X POST http://localhost:3030/api/categories \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "Ana Paula Costa",
-    "email": "ana@email.com",
-    "birthDate": "10/03/1992"
+    "category": "Doces",
+    "active": true
   }'
 
-# 5. Deletar o usuário
-curl -X DELETE http://localhost:3030/api/users/5
+# 3. Criar ingredientes
+curl -X POST http://localhost:3030/api/ingredients \
+  -H "Content-Type: application/json" \
+  -d '{"ingredient": "Farinha de trigo"}'
+
+curl -X POST http://localhost:3030/api/ingredients \
+  -H "Content-Type: application/json" \
+  -d '{"ingredient": "Açúcar"}'
+
+curl -X POST http://localhost:3030/api/ingredients \
+  -H "Content-Type: application/json" \
+  -d '{"ingredient": "Ovos"}'
+
+# 4. Criar receita
+curl -X POST http://localhost:3030/api/recipes \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Bolo de Chocolate",
+    "description": "Delicioso bolo caseiro",
+    "imageURL": "https://exemplo.com/bolo.jpg",
+    "author": {"id": 1},
+    "idPreparation": 1,
+    "idDifficulty": 1,
+    "idCost": 1
+  }'
+
+# 5. Adicionar ingredientes à receita
+curl -X POST http://localhost:3030/api/recipes/1/ingredients \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ingredient": {"id": 1},
+    "quantity": 2.5,
+    "idMeasurement": 1
+  }'
+
+curl -X POST http://localhost:3030/api/recipes/1/ingredients \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ingredient": {"id": 2},
+    "quantity": 1.0,
+    "idMeasurement": 1
+  }'
+
+# 6. Buscar receita completa
+curl -X GET http://localhost:3030/api/recipes/1
+
+# 7. Listar ingredientes da receita
+curl -X GET http://localhost:3030/api/recipes/1/ingredients
 ```
 
----
+### Buscar Receitas por Autor
 
-## Estrutura do Objeto User
-
-```json
-{
-  "id": 1, // ID único (auto-incremento)
-  "name": "João Silva", // Nome completo
-  "email": "joao@email.com", // Email único
-  "birthDate": "15/01/1990", // Data nascimento (DD/MM/YYYY no envio)
-  "cep": 12345678, // CEP (apenas números)
-  "gender": "Masculino", // Masculino/Feminino/Outro
-  "password": "senha123", // Senha (apenas no POST)
-  "salt": "XxX", // Salt para hash (gerado)
-  "registrationDate": "2025-11-22 10:30:00", // Data de cadastro (auto)
-  "uuId": "abc123-def456" // UUID único (gerado)
-}
+```bash
+curl -X GET http://localhost:3030/api/recipes?author=1
 ```
 
----
+### Buscar Ingredientes
 
-## Notas para Desenvolvedores
+```bash
+# Listar todos
+curl -X GET http://localhost:3030/api/ingredients
 
-- O servidor roda na porta **3030** por padrão (configurável em `App.java`)
-- A conexão com MySQL está configurada em `DAO.java`
-- **Conversão de Data:** A API aceita datas no formato brasileiro `DD/MM/YYYY` e converte automaticamente para `YYYY-MM-DD` (formato MySQL) via `UserService.formatBirthDateSQL()`
-- Senhas não são criptografadas atualmente (funcionalidade em desenvolvimento)
-- O campo `salt` está com valor fixo "XxX" (será implementado futuramente)
-- O `uuId` está com valor fixo "zZz" no momento do cadastro
+# Buscar por nome
+curl -X GET http://localhost:3030/api/ingredients?search=farinha
+```
+
+### Gerenciar Categorias
+
+```bash
+# Listar apenas ativas
+curl -X GET http://localhost:3030/api/categories/active
+
+# Desativar categoria
+curl -X GET http://localhost:3030/api/categories/1/deactivate
+
+# Reativar categoria
+curl -X GET http://localhost:3030/api/categories/1/activate
+```

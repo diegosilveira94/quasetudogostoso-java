@@ -4,7 +4,7 @@ API REST para plataforma de compartilhamento de receitas culinárias.
 
 ## 📋 Sobre o Projeto
 
-O **Quase Tudo Gostoso** é uma aplicação backend desenvolvida em Java que oferece uma API RESTful para gerenciamento de usuários. O projeto está em desenvolvimento inicial e futuramente incluirá funcionalidades para receitas culinárias, comentários e categorias.
+O **Quase Tudo Gostoso** é uma aplicação backend desenvolvida em Java que oferece uma API RESTful para gerenciamento de usuários, receitas, categorias e ingredientes.
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -19,33 +19,37 @@ O **Quase Tudo Gostoso** é uma aplicação backend desenvolvida em Java que ofe
 
 ```
 quasetudogostoso/
-├── src/
-│   ├── main/java/com/quasetudogostoso/
-│   │   ├── App.java                 # Classe principal
-│   │   ├── config/
-│   │   │   └── DAO.java             # Data Access Object
-│   │   ├── controller/
-│   │   │   └── UserController.java  # Controlador REST de usuários
-│   │   ├── model/
-│   │   │   └── User.java            # Entidade de usuário
-│   │   ├── repository/
-│   │   │   └── UserRepository.java  # Camada de acesso a dados
-│   │   └── service/
-│   │       └── UserService.java     # Lógica de negócio
-│   └── test/java/                   # Testes unitários
-├── database/
-│   └── createQTG.sql                # Script de criação do banco
-├── pom.xml                           # Configuração Maven
-├── README.md                         # Documentação geral
-└── API.md                            # Documentação dos endpoints
+├── src/main/java/com/quasetudogostoso/
+│   ├── App.java                        # Classe principal
+│   ├── config/
+│   │   └── DAO.java                    # Data Access Object
+│   ├── controller/                     # Controllers REST
+│   │   ├── UserController.java
+│   │   ├── RecipeController.java
+│   │   ├── CategoryController.java
+│   │   ├── IngredientController.java
+│   │   └── RecipeIngredientController.java
+│   ├── model/                          # Entidades
+│   │   ├── User.java
+│   │   ├── Recipe.java
+│   │   ├── Category.java
+│   │   ├── Ingredient.java
+│   │   └── RecipeIngredient.java
+│   ├── repository/                     # Acesso a dados
+│   └── service/                        # Lógica de negócio
+├── database/createQTG.sql              # Script do banco
+├── pom.xml
+└── API.md                              # Documentação completa
 ```
 
 ## 🗄️ Funcionalidades Implementadas
 
-- ✅ **CRUD de Usuários** - Criação, listagem, atualização e exclusão
-- ✅ **Validação de Email** - Verifica duplicidade no cadastro
-- ✅ **Conversão de Gênero** - String ↔ Integer no banco de dados
-- 🚧 **Receitas, Ingredientes e Categorias** - Em desenvolvimento
+- ✅ **CRUD de Usuários** - Gerenciamento completo de usuários
+- ✅ **CRUD de Receitas** - Criação, listagem, atualização e exclusão
+- ✅ **CRUD de Categorias** - Gerenciamento com ativação/desativação
+- ✅ **CRUD de Ingredientes** - Com busca por nome
+- ✅ **Ingredientes de Receitas** - Associação receita-ingrediente-quantidade
+- ✅ **Validações** - Email único, autor obrigatório, limites de caracteres
 
 ## ⚙️ Configuração e Instalação
 
@@ -55,15 +59,15 @@ quasetudogostoso/
 - Maven 3.6+
 - MySQL 8.0+
 
-### Configuração do Banco de Dados
+### Configuração do Banco
 
-1. Crie o banco de dados executando o script SQL:
+1. Execute o script SQL:
 
 ```bash
 mysql -u root -p < database/createQTG.sql
 ```
 
-2. Configure as credenciais do banco em `DAO.java`:
+2. Configure em `DAO.java`:
 
 ```java
 final String URL = "jdbc:mysql://localhost:3306/quasetudogostoso";
@@ -71,58 +75,56 @@ final String USER = "root";
 final String PASSWORD = "";
 ```
 
-### Executando o Projeto
-
-1. Clone o repositório:
+### Executando
 
 ```bash
+# Clonar
 git clone https://github.com/diegosilveira94/qtg-java.git
 cd quasetudogostoso
-```
 
-2. Compile o projeto:
-
-```bash
+# Compilar e executar
 mvn clean install
-```
-
-3. Execute a aplicação:
-
-```bash
 mvn exec:java -Dexec.mainClass="com.quasetudogostoso.App"
 ```
 
-O servidor será iniciado em `http://localhost:3030`
+Servidor: `http://localhost:3030`
 
-## 📡 API
+## 📡 API Endpoints
 
-A documentação completa dos endpoints está disponível em **[API.md](API.md)**.
+| Recurso             | Método | Endpoint                              |
+| ------------------- | ------ | ------------------------------------- |
+| **Usuários**        | GET    | `/api/users`                          |
+|                     | GET    | `/api/users/{id}`                     |
+|                     | POST   | `/api/users`                          |
+|                     | PUT    | `/api/users/{id}`                     |
+|                     | DELETE | `/api/users/{id}`                     |
+| **Receitas**        | GET    | `/api/recipes`                        |
+|                     | GET    | `/api/recipes/{id}`                   |
+|                     | GET    | `/api/recipes?author={userId}`        |
+|                     | POST   | `/api/recipes`                        |
+|                     | PUT    | `/api/recipes/{id}`                   |
+|                     | DELETE | `/api/recipes/{id}`                   |
+| **Categorias**      | GET    | `/api/categories`                     |
+|                     | GET    | `/api/categories/active`              |
+|                     | GET    | `/api/categories/{id}`                |
+|                     | POST   | `/api/categories`                     |
+|                     | PUT    | `/api/categories/{id}`                |
+|                     | DELETE | `/api/categories/{id}`                |
+|                     | GET    | `/api/categories/{id}/activate`       |
+|                     | GET    | `/api/categories/{id}/deactivate`     |
+| **Ingredientes**    | GET    | `/api/ingredients`                    |
+|                     | GET    | `/api/ingredients?search={termo}`     |
+|                     | GET    | `/api/ingredients/{id}`               |
+|                     | POST   | `/api/ingredients`                    |
+|                     | PUT    | `/api/ingredients/{id}`               |
+|                     | DELETE | `/api/ingredients/{id}`               |
+| **Receita-Ingred.** | GET    | `/api/recipes/{id}/ingredients`       |
+|                     | POST   | `/api/recipes/{id}/ingredients`       |
+|                     | PUT    | `/api/recipes/{id}/ingredients/{ing}` |
+|                     | DELETE | `/api/recipes/{id}/ingredients/{ing}` |
+|                     | DELETE | `/api/recipes/{id}/ingredients`       |
 
-### Endpoints Disponíveis
-
-| Método | Endpoint          | Descrição                |
-| ------ | ----------------- | ------------------------ |
-| POST   | `/api/users`      | Criar novo usuário       |
-| GET    | `/api/users`      | Listar todos os usuários |
-| GET    | `/api/users/{id}` | Buscar usuário por ID    |
-| PUT    | `/api/users/{id}` | Atualizar usuário        |
-| DELETE | `/api/users/{id}` | Deletar usuário          |
-
-**Exemplo Rápido:**
-
-```bash
-# Criar usuário
-curl -X POST http://localhost:3030/api/users \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "João Silva",
-    "email": "joao@email.com",
-    "birthDate": "15/01/1990",
-    "cep": 12345678,
-    "gender": "Masculino",
-    "password": "senha123"
-  }'
-```
+📄 **Documentação completa:** [API.md](API.md)
 
 ## 🧪 Testes
 
@@ -134,17 +136,15 @@ mvn test
 
 ## 🏗️ Arquitetura
 
-O projeto utiliza uma arquitetura em camadas seguindo princípios SOLID:
-
 ```
 Controller → Service → Repository → DAO → Database
 ```
 
-- **Controller** - Gerencia requisições HTTP e respostas
-- **Service** - Implementa regras de negócio e validações
-- **Repository** - Acessa e manipula dados no banco
-- **DAO** - Gerencia conexão com o banco de dados
-- **Model** - Define as entidades do domínio
+- **Controller** - Rotas HTTP e validação de entrada
+- **Service** - Regras de negócio e validações
+- **Repository** - Acesso e manipulação de dados
+- **DAO** - Gerenciamento de conexão
+- **Model** - Entidades do domínio
 
 ## 📚 Referências
 

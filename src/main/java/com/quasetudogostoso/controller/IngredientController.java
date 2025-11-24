@@ -7,18 +7,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import com.google.gson.Gson;
-import com.quasetudogostoso.model.Recipe;
-import com.quasetudogostoso.service.RecipeService;
+import com.quasetudogostoso.model.Ingredient;
+import com.quasetudogostoso.service.IngredientService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 /**
  * Controlador REST responsável por gerenciar as requisições HTTP relacionadas
- * às receitas. Implementa os endpoints CRUD para a entidade Recipe.
+ * aos ingredientes. Implementa os endpoints CRUD para a entidade Ingredient.
  */
-public class RecipeController implements HttpHandler {
+public class IngredientController implements HttpHandler {
 
-    private static final RecipeService service = new RecipeService();
+    private static final IngredientService service = new IngredientService();
 
     /**
      * Processa as requisições HTTP recebidas e direciona para o handler
@@ -31,20 +31,23 @@ public class RecipeController implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
+        String query = exchange.getRequestURI().getQuery();
 
         if ("GET".equalsIgnoreCase(method)) {
-            if (path.matches("/api/recipes") && !path.contains("/ingredients")) {
+            if (path.matches("/api/ingredients") && query != null && query.startsWith("search=")) {
+                handleSearch(exchange, query);
+            } else if (path.matches("/api/ingredients")) {
                 handleGetAll(exchange);
-            } else if (path.matches("/api/recipes/\\d+") && !path.contains("/ingredients")) {
+            } else if (path.matches("/api/ingredients/\\d+")) {
                 handleGetById(exchange, path);
             } else {
                 notFound(exchange);
             }
-        } else if ("POST".equalsIgnoreCase(method) && path.equals("/api/recipes")) {
+        } else if ("POST".equalsIgnoreCase(method) && path.equals("/api/ingredients")) {
             handleCreate(exchange);
-        } else if ("PUT".equalsIgnoreCase(method) && path.matches("/api/recipes/\\d+")) {
+        } else if ("PUT".equalsIgnoreCase(method) && path.matches("/api/ingredients/\\d+")) {
             handleUpdate(exchange, path);
-        } else if ("DELETE".equalsIgnoreCase(method) && path.matches("/api/recipes/\\d+")) {
+        } else if ("DELETE".equalsIgnoreCase(method) && path.matches("/api/ingredients/\\d+")) {
             handleDelete(exchange, path);
         } else {
             notFound(exchange);
@@ -52,29 +55,40 @@ public class RecipeController implements HttpHandler {
     }
 
     private void handleGetAll(HttpExchange exchange) throws IOException {
-        List<Recipe> recipes = service.getAllRecipes();
-        String json = new Gson().toJson(recipes);
+        List<Ingredient> ingredients = service.getAllIngredients();
+        String json = new Gson().toJson(ingredients);
         sendResponse(exchange, 200, json);
     }
 
     private void handleGetById(HttpExchange exchange, String path) throws IOException {
         int id = Integer.parseInt(path.substring(path.lastIndexOf('/') + 1));
-        Recipe recipe = service.getRecipe(id);
-        if (recipe.getId() == 0) {
-            sendResponse(exchange, 404, "{\"error\":\"Receita não encontrada\"}");
+        Ingredient ingredient = service.getIngredient(id);
+        if (ingredient.getId() == 0) {
+            sendResponse(exchange, 404, "{\"error\":\"Ingrediente não encontrado\"}");
         } else {
-            String json = new Gson().toJson(recipe);
+            String json = new Gson().toJson(ingredient);
             sendResponse(exchange, 200, json);
+        }
+    }
+
+    private void handleSearch(HttpExchange exchange, String query) throws IOException {
+        String searchTerm = query.substring(7); // Remove "search="
+        try {
+            List<Ingredient> ingredients = service.searchIngredients(searchTerm);
+            String json = new Gson().toJson(ingredients);
+            sendResponse(exchange, 200, json);
+        } catch (Exception e) {
+            sendResponse(exchange, 400, "{\"error\":\"" + e.getMessage() + "\"}");
         }
     }
 
     private void handleCreate(HttpExchange exchange) throws IOException {
         InputStream is = exchange.getRequestBody();
         String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-        Recipe recipe = new Gson().fromJson(body, Recipe.class);
+        Ingredient ingredient = new Gson().fromJson(body, Ingredient.class);
         try {
-            service.registerRecipe(recipe);
-            String resp = new Gson().toJson(recipe);
+            service.registerIngredient(ingredient);
+            String resp = new Gson().toJson(ingredient);
             sendResponse(exchange, 200, resp);
         } catch (Exception e) {
             sendResponse(exchange, 400, "{\"error\":\"" + e.getMessage() + "\"}");
@@ -85,11 +99,11 @@ public class RecipeController implements HttpHandler {
         int id = Integer.parseInt(path.substring(path.lastIndexOf('/') + 1));
         InputStream is = exchange.getRequestBody();
         String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-        Recipe recipe = new Gson().fromJson(body, Recipe.class);
-        recipe.setId(id);
+        Ingredient ingredient = new Gson().fromJson(body, Ingredient.class);
+        ingredient.setId(id);
         try {
-            service.updateRecipe(recipe);
-            sendResponse(exchange, 200, "{\"status\":\"Receita atualizada!\"}");
+            service.updateIngredient(ingredient);
+            sendResponse(exchange, 200, "{\"status\":\"Ingrediente atualizado!\"}");
         } catch (Exception e) {
             sendResponse(exchange, 400, "{\"error\":\"" + e.getMessage() + "\"}");
         }
@@ -98,8 +112,8 @@ public class RecipeController implements HttpHandler {
     private void handleDelete(HttpExchange exchange, String path) throws IOException {
         int id = Integer.parseInt(path.substring(path.lastIndexOf('/') + 1));
         try {
-            service.deleteRecipe(id);
-            sendResponse(exchange, 200, "{\"status\":\"Receita deletada!\"}");
+            service.deleteIngredient(id);
+            sendResponse(exchange, 200, "{\"status\":\"Ingrediente deletado!\"}");
         } catch (Exception e) {
             sendResponse(exchange, 400, "{\"error\":\"" + e.getMessage() + "\"}");
         }
