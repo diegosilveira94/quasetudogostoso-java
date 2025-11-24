@@ -12,7 +12,6 @@ import com.sun.net.httpserver.HttpServer;
 public class App {
 
     private static final int PORT = 3030;
-    public static UserController userController = new UserController();
 
     /**
      * Método principal que inicializa o servidor HTTP. Configura o servidor
@@ -25,7 +24,7 @@ public class App {
         // Create HTTP server
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
         // Define routes
-        server.createContext("/api/users", userController);
+        server.createContext("/api/users", new UserController());
         // Start the server
         server.setExecutor(null);
         server.start();
